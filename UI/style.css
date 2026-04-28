@@ -50,3 +50,6 @@ body {
   color: white;
   cursor: pointer;
 }
+.cell.hover:not(.player):not(.ai) {
+  background: #444 !important;
+}
