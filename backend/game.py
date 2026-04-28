@@ -11,7 +11,7 @@ COLUMN_COUNT = 7
 
 # PLayer and AI indices
 PLAYER = 0
-AI = 0
+AI = 1
 
 #Player and AI game pieces
 PLAYER_PIECE = 1
