@@ -19,6 +19,15 @@ const statusElement = document.getElementById('status');
 const resetButton = document.getElementById('reset');
 const diffBtns = document.querySelectorAll('.diff-btn');
 
+const depthStat = document.getElementById('depthStat');
+const runtimeStat = document.getElementById('runtimeStat');
+const scoreStat = document.getElementById('scoreStat');
+const aiWinsStat = document.getElementById('aiWinsStat');
+const playerWinsStat = document.getElementById('playerWinsStat');
+const winRateStat = document.getElementById('winRateStat');
+let aiWins = 0;
+let playerWins = 0;
+
 // Game state
 let board = [];
 let gameOver = false;
@@ -240,10 +249,28 @@ function handleDraw() {
   statusElement.textContent = 'Draw!';
 }
 
+function updateWinStats() {
+  const totalGames = aiWins + playerWins;
+  const winRate = totalGames === 0 ? 0 : (aiWins / totalGames) * 100;
+
+  aiWinsStat.textContent = aiWins;
+  playerWinsStat.textContent = playerWins;
+  winRateStat.textContent = winRate.toFixed(1) + '%';
+}
+
 function doAiMove() {
   statusElement.textContent = 'AI thinking…';
   setTimeout(() => {
+    const startTime = performance.now();
+
     const result = minimax(board, aiDepth, -Infinity, Infinity, true);
+
+    const endTime = performance.now();
+    const runtime = endTime - startTime;
+
+    depthStat.textContent = aiDepth;
+    runtimeStat.textContent = runtime.toFixed(2);
+    scoreStat.textContent = result.score;
     const col = result.col;
     const row = getNextOpenRow(board, col);
     dropPiece(board, row, col, AI);
