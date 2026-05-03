@@ -240,6 +240,13 @@ function handleWin(piece) {
   boardElement.style.pointerEvents = 'none';
   clearHighlights();
   statusElement.textContent = piece === PLAYER ? 'You win!' : 'AI wins!';
+  if (piece === AI) {
+    aiWins++;
+  } else {
+    playerWins++;
+  }
+
+  updateWinStats();
 }
 
 function handleDraw() {
