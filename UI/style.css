@@ -111,10 +111,6 @@ body {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.25; }
 }
-.piece {
-    transition: transform 0.25s ease-out;
-}
-
-.drop-animation {
-    transform: translateY(100px);
+#board {
+    border: 3px solid rgba(255,255,255,0.2);
 }
