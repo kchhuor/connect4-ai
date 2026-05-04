@@ -339,12 +339,13 @@ function resetGame() {
   gameOver = false;
   playerTurn = true;
   boardElement.style.pointerEvents = 'auto';
+  totalRuntime = 0;
+  moveCount = 0;
   clearHighlights();
   statusElement.textContent = 'Your turn';
   document.getElementById("gameNumber").textContent = "Game " + gameNumber;
   summaryBtn.style.display = 'none';
-  totalRuntime = 0;
-  moveCount = 0;
+  
 gameNumber++;
 }
 
