@@ -10,7 +10,7 @@ const EMPTY = 0;
 // Win condition length
 const WIN_LENGTH = 4;
 
-// Center columns searched first for better alpha-beta pruning
+// Center columns searched first (better pruning)
 const COL_ORDER = [3, 2, 4, 1, 5, 0, 6];
 
 // DOM
@@ -19,15 +19,12 @@ const statusElement = document.getElementById('status');
 const resetButton = document.getElementById('reset');
 const diffBtns = document.querySelectorAll('.diff-btn');
 
-// Performance and win stat display elements
 const depthStat = document.getElementById('depthStat');
 const runtimeStat = document.getElementById('runtimeStat');
 const scoreStat = document.getElementById('scoreStat');
 const aiWinsStat = document.getElementById('aiWinsStat');
 const playerWinsStat = document.getElementById('playerWinsStat');
 const winRateStat = document.getElementById('winRateStat');
-
-// Running win totals across games
 let aiWins = 0;
 let playerWins = 0;
 
@@ -35,44 +32,34 @@ let playerWins = 0;
 let board = [];
 let gameOver = false;
 let playerTurn = true;
-let aiDepth = 2; // Default depth/difficulty(easy)
+let aiDepth = 2; // Default depth
 
 // Board helpers
-function createEmptyBoard() // Fills board array with empty cells
-{
+function createEmptyBoard() {
   board = Array.from({ length: ROW_COUNT }, () => Array(COLUMN_COUNT).fill(EMPTY));
 }
 
-// Returns lowest empty row in a column, null if column is full
-function getNextOpenRow(b, col) 
-{
+function getNextOpenRow(b, col) {
   for (let r = 0; r < ROW_COUNT; r++) {
     if (b[r][col] === EMPTY) return r;
   }
   return null;
 }
 
-// Returns all columns that still have space, ordered center-first
-function getValidCols(b) 
-{
+function getValidCols(b) {
   return COL_ORDER.filter(c => b[ROW_COUNT - 1][c] === EMPTY);
 }
 
-// Places a piece into the board array at given position
-function dropPiece(b, row, col, piece) 
-{
+function dropPiece(b, row, col, piece) {
   b[row][col] = piece;
 }
 
-// Returns a fresh copy of board so original isn't modified during search
-function cloneBoard(b) 
-{
+function cloneBoard(b) {
   return b.map(row => [...row]);
 }
 
 // Win condition check
-function checkWin(b, piece) // Checks if given piece has 4 in a row in any direction
-{
+function checkWin(b, piece) {
   // Horizontal
   for (let r = 0; r < ROW_COUNT; r++)
     for (let c = 0; c <= COLUMN_COUNT - WIN_LENGTH; c++)
@@ -96,9 +83,7 @@ function checkWin(b, piece) // Checks if given piece has 4 in a row in any direc
   return false;
 }
 
-// Returns [row, col] coordinates of the 4 winning cells for flashing on screen
-function getWinningCells(b, piece) 
-{
+function getWinningCells(b, piece) {
   for (let r = 0; r < ROW_COUNT; r++)
     for (let c = 0; c <= COLUMN_COUNT - WIN_LENGTH; c++)
       if (b[r][c]===piece && b[r][c+1]===piece && b[r][c+2]===piece && b[r][c+3]===piece)
@@ -118,36 +103,29 @@ function getWinningCells(b, piece)
   return null;
 }
 
-// Returns true if no columns have space left
-function isBoardFull(b) 
-{
+function isBoardFull(b) {
   return getValidCols(b).length === 0;
 }
 
-// Returns true if game is over; someone won or board is full
-function isTerminal(b) 
-{
+function isTerminal(b) {
   return checkWin(b, PLAYER) || checkWin(b, AI) || isBoardFull(b);
 }
 
 // Heuristic scoring
-function scoreWindow(window, piece) // Scores a single window of 4 cells based on how favorable for given piece
-{
+function scoreWindow(window, piece) {
   const opp = piece === AI ? PLAYER : AI;
   const pieceCount = window.filter(v => v === piece).length;
   const emptyCount = window.filter(v => v === EMPTY).length;
   const oppCount = window.filter(v => v === opp).length;
 
-  if (pieceCount === 4) return 100000; // win
-  if (pieceCount === 3 && emptyCount === 1) return 10; // 3 in a row + empty
-  if (pieceCount === 2 && emptyCount === 2) return 3; // 2 in a row + empty
-  if (oppCount === 3 && emptyCount === 1) return -80; // block oponent threat
+  if (pieceCount === 4) return 100000;
+  if (pieceCount === 3 && emptyCount === 1) return 10;
+  if (pieceCount === 2 && emptyCount === 2) return 3;
+  if (oppCount === 3 && emptyCount === 1) return -80;
   return 0;
 }
 
-// Scores the full board + rewards center control and strong windows of 4
-function scoreBoard(b, piece) 
-{
+function scoreBoard(b, piece) {
   let score = 0;
 
   // Center column bonus
@@ -179,15 +157,12 @@ function scoreBoard(b, piece)
 }
 
 // Minimax + Alpha-beta pruning
-function minimax(b, depth, alpha, beta, maximizing) // Searches ahead up to depth moves, pruning branches that won't change the outcome
-{
-  // Base case: depth limit reached or game over
-  if (depth === 0 || isTerminal(b)) 
-    {
-    if (checkWin(b, AI)) return { score: 1000000 + depth }; // AI wins
-    if (checkWin(b, PLAYER)) return { score: -1000000 - depth }; // Player wins
-    if (isBoardFull(b)) return { score: 0 }; // Draw
-    return { score: scoreBoard(b, AI) }; // Heuristic estimate
+function minimax(b, depth, alpha, beta, maximizing) {
+  if (depth === 0 || isTerminal(b)) {
+    if (checkWin(b, AI)) return { score: 1000000 + depth };
+    if (checkWin(b, PLAYER)) return { score: -1000000 - depth };
+    if (isBoardFull(b)) return { score: 0 };
+    return { score: scoreBoard(b, AI) };
   }
 
   const validCols = getValidCols(b);
@@ -202,7 +177,7 @@ function minimax(b, depth, alpha, beta, maximizing) // Searches ahead up to dept
       const result = minimax(newBoard, depth - 1, alpha, beta, false);
       if (result.score > value) { value = result.score; bestCol = col; }
       alpha = Math.max(alpha, value);
-      if (alpha >= beta) break; // Prune since player won't allow this branch
+      if (alpha >= beta) break;
     }
     return { score: value, col: bestCol };
   } else {
@@ -214,15 +189,14 @@ function minimax(b, depth, alpha, beta, maximizing) // Searches ahead up to dept
       const result = minimax(newBoard, depth - 1, alpha, beta, true);
       if (result.score < value) { value = result.score; bestCol = col; }
       beta = Math.min(beta, value);
-      if (alpha >= beta) break; // Prune since AI won't allow this branch
+      if (alpha >= beta) break;
     }
     return { score: value, col: bestCol };
   }
 }
 
 // Render, redraws boards
-function renderBoard() 
-{
+function renderBoard() {
   boardElement.innerHTML = '';
   for (let r = ROW_COUNT - 1; r >= 0; r--) {
     for (let c = 0; c < COLUMN_COUNT; c++) {
@@ -238,9 +212,7 @@ function renderBoard()
   }
 }
 
-// Highlights all empty cells in column when player hovers over
-function highlightColumn(col) 
-{
+function highlightColumn(col) {
   clearHighlights();
   document.querySelectorAll(`.cell[data-col='${col}']`).forEach(cell => {
     if (!cell.classList.contains('player') && !cell.classList.contains('ai'))
@@ -248,15 +220,11 @@ function highlightColumn(col)
   });
 }
 
-// Removes all hover highlights from board
-function clearHighlights() 
-{
+function clearHighlights() {
   document.querySelectorAll('.cell.hover').forEach(c => c.classList.remove('hover'));
 }
 
-// Flash animation to 4 winning cells
-function flashWinCells(piece) 
-{
+function flashWinCells(piece) {
   const cells = getWinningCells(board, piece);
   if (!cells) return;
   cells.forEach(([r, c]) => {
@@ -266,34 +234,29 @@ function flashWinCells(piece)
 }
 
 // Game logic
-function handleWin(piece)  // Ends game, flashes winning cells, updates score, displays result
-{
+function handleWin(piece) {
   gameOver = true;
   flashWinCells(piece);
   boardElement.style.pointerEvents = 'none';
   clearHighlights();
   statusElement.textContent = piece === PLAYER ? 'You win!' : 'AI wins!';
-  // Increment win counter, refresh stats display
   if (piece === AI) {
     aiWins++;
   } else {
     playerWins++;
   }
+
   updateWinStats();
 }
 
-// Ends game, shows draw message
-function handleDraw() 
-{
+function handleDraw() {
   gameOver = true;
   boardElement.style.pointerEvents = 'none';
   clearHighlights();
   statusElement.textContent = 'Draw!';
 }
 
-// Recalculates and updates win rate display after each game
-function updateWinStats() 
-{
+function updateWinStats() {
   const totalGames = aiWins + playerWins;
   const winRate = totalGames === 0 ? 0 : (aiWins / totalGames) * 100;
 
@@ -302,15 +265,13 @@ function updateWinStats()
   winRateStat.textContent = winRate.toFixed(1) + '%';
 }
 
-// Picks and plays AI's move then updates the stats panel
-function doAiMove() 
-{
+function doAiMove() {
   statusElement.textContent = 'AI thinking…';
   setTimeout(() => {
     const startTime = performance.now();
     let col;
     let score = 0;
-    // Easy mode, 30% randomness for weaker play
+    // Easy mode randomness
     if (aiDepth === 2 && Math.random() < 0.3) {
       const validCols = getValidCols(board);
       col = validCols[Math.floor(Math.random() * validCols.length)];
@@ -334,19 +295,16 @@ function doAiMove()
     if (checkWin(board, AI)) { handleWin(AI); return; }
     if (isBoardFull(board)) { handleDraw(); return; }
 
-    // Back to player
     playerTurn = true;
     boardElement.style.pointerEvents = 'auto';
     statusElement.textContent = 'Your turn';
   }, 30);
 }
 
-// Handles player clicking a column, drops their piece and triggers AI
-function handleColumnClick(col) 
-{
+function handleColumnClick(col) {
   if (gameOver || !playerTurn) return;
   const row = getNextOpenRow(board, col);
-  if (row === null) return; // collumn full
+  if (row === null) return;
 
   playerTurn = false;
   boardElement.style.pointerEvents = 'none';
@@ -360,9 +318,7 @@ function handleColumnClick(col)
   doAiMove();
 }
 
-// Resets all state and redraws fresh board
-function resetGame() 
-{
+function resetGame() {
   createEmptyBoard();
   renderBoard();
   gameOver = false;
