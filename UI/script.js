@@ -19,7 +19,7 @@ const boardElement = document.getElementById('board');
 const statusElement = document.getElementById('status');
 const resetButton = document.getElementById('reset');
 const diffBtns = document.querySelectorAll('.diff-btn');
-
+// Stats
 const depthStat = document.getElementById('depthStat');
 const runtimeStat = document.getElementById('runtimeStat');
 const scoreStat = document.getElementById('scoreStat');
@@ -28,6 +28,10 @@ const playerWinsStat = document.getElementById('playerWinsStat');
 const winRateStat = document.getElementById('winRateStat');
 let aiWins = 0;
 let playerWins = 0;
+totalRuntime += runtime;
+moveCount++;
+
+const avgRuntime = totalRuntime / moveCount;
 
 // Game state
 let board = [];
@@ -248,6 +252,7 @@ function handleWin(piece) {
   }
 
   updateWinStats();
+  summaryBtn.style.display = 'block';
 }
 
 function handleDraw() {
@@ -264,6 +269,7 @@ function updateWinStats() {
   aiWinsStat.textContent = aiWins;
   playerWinsStat.textContent = playerWins;
   winRateStat.textContent = winRate.toFixed(1) + '%';
+  summaryBtn.style.display = 'block';
 }
 
 function doAiMove() {
@@ -332,6 +338,7 @@ function resetGame() {
   clearHighlights();
   statusElement.textContent = 'Your turn';
   document.getElementById("gameNumber").textContent = "Game " + gameNumber;
+  summaryBtn.style.display = 'none';
 gameNumber++;
 }
 
@@ -361,6 +368,19 @@ diffBtns.forEach(btn => {
     resetGame();
   });
 });
+// Summary function
+const summaryBtn = document.getElementById('summaryBtn');
 
+summaryBtn.addEventListener('click', () => {
+  alert(`
+Game Summary
+
+Depth: ${aiDepth}
+Total Moves: ${moveCount}
+Average Runtime: ${(totalRuntime / moveCount).toFixed(2)} ms
+AI Wins: ${aiWins}
+Player Wins: ${playerWins}
+  `);
+});
 // Init
 resetGame();
