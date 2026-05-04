@@ -114,3 +114,14 @@ body {
 #board {
     border: 3px solid rgba(255,255,255,0.2);
 }
+.shake {
+    animation: shake 0.2s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}

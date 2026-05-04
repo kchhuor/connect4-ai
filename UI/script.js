@@ -304,7 +304,11 @@ function doAiMove() {
 function handleColumnClick(col) {
   if (gameOver || !playerTurn) return;
   const row = getNextOpenRow(board, col);
-  if (row === null) return;
+  if (row === null) {
+    boardElement.classList.add("shake");
+    setTimeout(() => boardElement.classList.remove("shake"), 200);
+    return;
+}
 
   playerTurn = false;
   boardElement.style.pointerEvents = 'none';
