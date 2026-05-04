@@ -28,8 +28,9 @@ const playerWinsStat = document.getElementById('playerWinsStat');
 const winRateStat = document.getElementById('winRateStat');
 let aiWins = 0;
 let playerWins = 0;
-totalRuntime += runtime;
-moveCount++;
+let totalRuntime = 0;
+let moveCount = 0;
+
 
 const avgRuntime = totalRuntime / moveCount;
 
@@ -290,10 +291,13 @@ function doAiMove() {
     }
     const endTime = performance.now();
     const runtime = endTime - startTime;
+    totalRuntime += runtime;
+    moveCount++;
+    const avgRuntime = totalRuntime / moveCount
 
     // Update stats
     depthStat.textContent = aiDepth;
-    runtimeStat.textContent = runtime.toFixed(2);
+    runtimeStat.textContent = avgRuntime.toFixed(2);
     scoreStat.textContent = score;
     const row = getNextOpenRow(board, col);
     dropPiece(board, row, col, AI);
