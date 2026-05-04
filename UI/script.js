@@ -1,3 +1,4 @@
+let gameNumber = 1;
 // Game board dimension
 const ROW_COUNT = 6;
 const COLUMN_COUNT = 7;
@@ -330,6 +331,8 @@ function resetGame() {
   boardElement.style.pointerEvents = 'auto';
   clearHighlights();
   statusElement.textContent = 'Your turn';
+  document.getElementById("gameNumber").textContent = "Game " + gameNumber;
+gameNumber++;
 }
 
 // Event listeners
