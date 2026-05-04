@@ -269,16 +269,25 @@ function doAiMove() {
   statusElement.textContent = 'AI thinking…';
   setTimeout(() => {
     const startTime = performance.now();
-
-    const result = minimax(board, aiDepth, -Infinity, Infinity, true);
-
+    let col;
+    let score = 0;
+    // Easy mode randomness
+    if (aiDepth === 2 && Math.random() < 0.3) {
+      const validCols = getValidCols(board);
+      col = validCols[Math.floor(Math.random() * validCols.length)];
+      score = 0; // random move has no minimax score
+    } else {
+      const result = minimax(board, aiDepth, -Infinity, Infinity, true);
+      col = result.col;
+      score = result.score;
+    }
     const endTime = performance.now();
     const runtime = endTime - startTime;
 
+    // Update stats
     depthStat.textContent = aiDepth;
     runtimeStat.textContent = runtime.toFixed(2);
-    scoreStat.textContent = result.score;
-    const col = result.col;
+    scoreStat.textContent = score;
     const row = getNextOpenRow(board, col);
     dropPiece(board, row, col, AI);
     renderBoard();
