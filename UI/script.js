@@ -343,6 +343,8 @@ function resetGame() {
   statusElement.textContent = 'Your turn';
   document.getElementById("gameNumber").textContent = "Game " + gameNumber;
   summaryBtn.style.display = 'none';
+  totalRuntime = 0;
+  moveCount = 0;
 gameNumber++;
 }
 
